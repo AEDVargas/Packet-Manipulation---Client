@@ -1,0 +1,7 @@
+D:\Backup Work\Current Work\Skeleton\NLT - Manipulation\Client\Client\bin\Debug\Client.exe.config
+D:\Backup Work\Current Work\Skeleton\NLT - Manipulation\Client\Client\bin\Debug\Client.exe
+D:\Backup Work\Current Work\Skeleton\NLT - Manipulation\Client\Client\bin\Debug\Client.pdb
+D:\Backup Work\Current Work\Skeleton\NLT - Manipulation\Client\Client\obj\Debug\Client.csprojAssemblyReference.cache
+D:\Backup Work\Current Work\Skeleton\NLT - Manipulation\Client\Client\obj\Debug\Client.csproj.CoreCompileInputs.cache
+D:\Backup Work\Current Work\Skeleton\NLT - Manipulation\Client\Client\obj\Debug\Client.exe
+D:\Backup Work\Current Work\Skeleton\NLT - Manipulation\Client\Client\obj\Debug\Client.pdb
