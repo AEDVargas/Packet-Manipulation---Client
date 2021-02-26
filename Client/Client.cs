@@ -37,7 +37,7 @@ namespace Client
                     TCPClient();
                     break;
                 case "2":
-                    debug_Mode();
+                    debug_ModeTCP();
                     break;
                 case "3":
                     sendBytes();
@@ -54,7 +54,8 @@ namespace Client
             }
         }
 
-        #region TCP Client
+        //TCP Client
+        #region TCP CLIENT
 
         private static void TCPClient()
         {
@@ -62,8 +63,6 @@ namespace Client
             IPAddress ipAddress = IPAddress.Parse(default_Host);
 
             StreamWriter sw;
-
-            int timeOut = 1000;
 
             try
             {
@@ -97,15 +96,11 @@ namespace Client
             }
         }
 
-        #endregion
-
-
-        #region TCP DEBUG
         private static TcpClient TCP_client;
 
         public static int counter = 1;
 
-        private static void debug_Mode()
+        private static void debug_ModeTCP()
         {
             TCP_client = new TcpClient();
 
@@ -150,7 +145,10 @@ namespace Client
         }
 
         #endregion
+        //TCP Client End
 
+        //Bytes
+        #region BYTES
 
         private static Socket ConnectSocket(string server, int port)
         {
@@ -184,17 +182,16 @@ namespace Client
             return s;
         }
 
-
         private static void sendBytes()
         {
             try
             {
-                string test = Console.ReadLine();
+                string u_input = Console.ReadLine();
 
-                byte[] buffer = Encoding.ASCII.GetBytes(test);
+                byte[] buffer = Encoding.ASCII.GetBytes(u_input);
                 byte[] bytesReceived = new byte[256];
 
-                using (Socket s = ConnectSocket("127.0.0.1", default_Port))
+                using (Socket s = ConnectSocket(default_Host, default_Port))
                 {
                     if(s == null)
                     {
@@ -211,13 +208,20 @@ namespace Client
             }
         }
 
+        #endregion
+        //Bytes End
+
+        //UDP Client
+        #region UDP CLIENT
+
+        private static IPAddress broadcast = IPAddress.Parse(default_Host);
+
         private static UdpClient UDP_Client;
 
         private static void UdpClient(string[] args)
         {
             UDP_Client = new UdpClient();
             Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            IPAddress broadcast = IPAddress.Parse("127.0.0.1");
 
             try
             {
@@ -249,8 +253,6 @@ namespace Client
             int counter = 1;
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
-            IPAddress broadcast = IPAddress.Parse("127.0.0.1");
-
             try
             {
                 while (true)
@@ -276,5 +278,7 @@ namespace Client
 
         }
 
+        #endregion
+        //UDP Client End
     }
 }
