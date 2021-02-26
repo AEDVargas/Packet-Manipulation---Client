@@ -10,15 +10,24 @@ using System.IO;
 
 namespace Client
 {
-    class Program
+    class Client
     {
+        private static string default_Host = "127.0.0.1";
+        private static int default_Port = 1303;
+        private static int timeOut = 5000;
+
+        public static StreamWriter sw;
+        public static StringBuilder sb;
 
         static void Main(string[] args)
         {
             Console.WriteLine(" 1 : TCP");
             Console.WriteLine(" 2 : DEBUG MODE (TCP)");
-            Console.WriteLine(" 3 : Test");
+            Console.WriteLine(" 3 : sendBytes");
+            Console.WriteLine(" 4 : UDP");
+            Console.WriteLine(" 5 : DEBUG MODE (UDP)");
 
+            Console.Write("\n\nSelection : ");
 
             string selection = Console.ReadLine();
 
@@ -33,16 +42,24 @@ namespace Client
                 case "3":
                     sendBytes();
                     break;
+                case "4":
+                    UdpClient(args);
+                    break;
+                case "5":
+                    udp_Debug();
+                    break;
                 default:
                     Console.WriteLine("Please select a valid option");
                     break;
             }
         }
 
+        #region TCP Client
+
         private static void TCPClient()
         {
             TcpClient client = new TcpClient();
-            IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
+            IPAddress ipAddress = IPAddress.Parse(default_Host);
 
             StreamWriter sw;
 
@@ -50,8 +67,7 @@ namespace Client
 
             try
             {
-
-                client.Connect(ipAddress, 1303);
+                client.Connect(ipAddress, default_Port);
                 client.SendTimeout = timeOut;
                 client.ReceiveTimeout = timeOut;
 
@@ -81,19 +97,13 @@ namespace Client
             }
         }
 
+        #endregion
 
-        private static string default_host = "localhost";
-        private static int timeout = 5000;
 
+        #region TCP DEBUG
         private static TcpClient TCP_client;
-        private static DateTime startTimer;
 
-        public static StreamWriter sw;
-        public static StringBuilder sb;
-
-        public static int counter = 0;
-
-        Socket s = null;
+        public static int counter = 1;
 
         private static void debug_Mode()
         {
@@ -101,9 +111,9 @@ namespace Client
 
             try
             {
-                TCP_client.Connect(default_host, 1303);
-                TCP_client.SendTimeout = timeout;
-                TCP_client.ReceiveTimeout = timeout;
+                TCP_client.Connect(default_Host, default_Port);
+                TCP_client.SendTimeout = timeOut;
+                TCP_client.ReceiveTimeout = timeOut;
                 sw = new StreamWriter(TCP_client.GetStream());
 
                 try
@@ -138,6 +148,9 @@ namespace Client
                 Console.WriteLine("/n" + e);
             }
         }
+
+        #endregion
+
 
         private static Socket ConnectSocket(string server, int port)
         {
@@ -181,7 +194,7 @@ namespace Client
                 byte[] buffer = Encoding.ASCII.GetBytes(test);
                 byte[] bytesReceived = new byte[256];
 
-                using (Socket s = ConnectSocket("127.0.0.1", 1303))
+                using (Socket s = ConnectSocket("127.0.0.1", default_Port))
                 {
                     if(s == null)
                     {
@@ -196,6 +209,71 @@ namespace Client
                 Console.WriteLine("ERROR: connection dropped.");
                 Console.WriteLine("/n" + e);
             }
+        }
+
+        private static UdpClient UDP_Client;
+
+        private static void UdpClient(string[] args)
+        {
+            UDP_Client = new UdpClient();
+            Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            IPAddress broadcast = IPAddress.Parse("127.0.0.1");
+
+            try
+            {
+                byte[] buffer = Encoding.ASCII.GetBytes(Console.ReadLine());
+                IPEndPoint endPoint = new IPEndPoint(broadcast, default_Port);
+
+                string asciiString = Encoding.ASCII.GetString(buffer, 0, buffer.Length);
+
+                if (asciiString == "back")
+                {
+                    Main(buffer.ToString().Split());
+                }
+
+                s.SendTo(buffer, endPoint);
+
+                UdpClient(buffer.ToString().Split());
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("ERROR: Cannot connect to endpoint");
+                Console.WriteLine("/n" + e);
+            }
+        }
+
+        private static void udp_Debug()
+        {
+            UDP_Client = new UdpClient();
+            int counter = 1;
+            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+
+            IPAddress broadcast = IPAddress.Parse("127.0.0.1");
+
+            try
+            {
+                while (true)
+                {
+                    sb = new StringBuilder("-", 10);
+                    for (int i = 0; i < 10; i++)
+                    {
+                        byte[] buffer = Encoding.ASCII.GetBytes(counter.ToString());
+                        IPEndPoint endPoint = new IPEndPoint(broadcast, default_Port);
+
+                        socket.SendTo(buffer, endPoint);
+                        sb.Append("-");
+                        counter++;
+                        Thread.Sleep(1000);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("ERROR: Cannot connect to endpoint");
+                Console.WriteLine("/n" + e);
+            }
+
         }
 
     }
