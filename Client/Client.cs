@@ -19,6 +19,8 @@ namespace Client
         public static StreamWriter sw;
         public static StringBuilder sb;
 
+        private static IPAddress broadcast = IPAddress.Parse(default_Host);
+
         static void Main(string[] args)
         {
             Console.WriteLine(" 1 : TCP");
@@ -40,7 +42,7 @@ namespace Client
                     debug_ModeTCP();
                     break;
                 case "3":
-                    sendBytes();
+                    startByteConnection();
                     break;
                 case "4":
                     UdpClient(args);
@@ -164,10 +166,9 @@ namespace Client
             foreach (IPAddress address in hostEntry.AddressList)
             {
                 IPEndPoint ipe = new IPEndPoint(address, port);
-                Socket tempSocket =
-                    new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                Socket tempSocket = new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-                tempSocket.Connect(ipe);
+                tempSocket.Connect(default_Host, default_Port);
 
                 if (tempSocket.Connected)
                 {
@@ -182,29 +183,78 @@ namespace Client
             return s;
         }
 
-        private static void sendBytes()
+        public static bool firstRun = true;
+
+        private static void startByteConnection()
         {
+            TcpClient client = new TcpClient();
+            IPAddress ipAddress = IPAddress.Parse(default_Host);
+
             try
             {
-                string u_input = Console.ReadLine();
+                client.Connect(ipAddress, default_Port);
+                client.SendTimeout = timeOut;
+                client.ReceiveTimeout = timeOut;
 
-                byte[] buffer = Encoding.ASCII.GetBytes(u_input);
-                byte[] bytesReceived = new byte[256];
+                sendBytes(client);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("ERROR : trouble connecting client ~~~ \n" + e);
+            }
+        }
 
-                using (Socket s = ConnectSocket(default_Host, default_Port))
+        private static void sendBytes(TcpClient client)
+        {
+            //TcpClient test_Client = new TcpClient();
+            //Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+            //try
+            //{
+            //    IPEndPoint endPoint = new IPEndPoint(broadcast, default_Port);
+
+            //    string asciiString = Encoding.ASCII.GetString(buffer, 0, buffer.Length);
+
+            //    if (asciiString == "back")
+            //    {
+            //        Main(buffer.ToString().Split());
+            //    }
+
+            //    s.SendTo(buffer, endPoint);
+
+
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine("ERROR: Cannot connect to endpoint");
+            //    Console.WriteLine("/n" + e);
+            //}
+            //sendBytes();
+
+            StreamWriter sw;
+
+            try
+            {
+                byte[] buffer = Encoding.ASCII.GetBytes(Console.ReadLine());
+
+                sw = new StreamWriter(client.GetStream());
+                try
                 {
-                    if(s == null)
-                    {
-                        Console.WriteLine("Connection failed");
+                    sw.WriteLine(buffer);
+                    sw.Flush();
 
-                        s.Send(buffer, buffer.Length, 0);
-                    }
+                    Thread.Sleep(1000);
+
+                    sendBytes(client);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("ERROR : trouble streaming client ~~~ \n" + e);
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine("ERROR: connection dropped.");
-                Console.WriteLine("/n" + e);
+                Console.WriteLine("ERROR : trouble connecting client ~~~ \n" + e);
             }
         }
 
@@ -214,13 +264,11 @@ namespace Client
         //UDP Client
         #region UDP CLIENT
 
-        private static IPAddress broadcast = IPAddress.Parse(default_Host);
 
         private static UdpClient UDP_Client;
 
         private static void UdpClient(string[] args)
         {
-            UDP_Client = new UdpClient();
             Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
             try
@@ -249,7 +297,6 @@ namespace Client
 
         private static void udp_Debug()
         {
-            UDP_Client = new UdpClient();
             int counter = 1;
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
