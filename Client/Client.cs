@@ -42,7 +42,7 @@ namespace Client
                     debug_ModeTCP();
                     break;
                 case "3":
-                    startByteConnection();
+                    ConnectSocket(default_Host, default_Port);
                     break;
                 case "4":
                     UdpClient(args);
@@ -59,30 +59,31 @@ namespace Client
         //TCP Client
         #region TCP CLIENT
 
+
         private static void TCPClient()
         {
             TcpClient client = new TcpClient();
-            IPAddress ipAddress = IPAddress.Parse(default_Host);
 
-            StreamWriter sw;
 
             try
             {
-                client.Connect(ipAddress, default_Port);
+                client.Connect(default_Host, default_Port);
                 client.SendTimeout = timeOut;
                 client.ReceiveTimeout = timeOut;
 
                 string u_input = "";
 
-                sw = new StreamWriter(client.GetStream());
+                NetworkStream stream = client.GetStream();
+
                 try
                 {
                     do
                     {
                         u_input = Console.ReadLine();
-                        sw.WriteLine(u_input);
-                        sw.Flush();
 
+                        byte[] data = System.Text.Encoding.ASCII.GetBytes(u_input);
+
+                        stream.Write(data, 0, data.Length);
                     } while (u_input != "stop");
 
                     Main(u_input.Split());
@@ -97,6 +98,45 @@ namespace Client
                 Console.WriteLine("ERROR : trouble connecting client ~~~ \n" + e);
             }
         }
+
+        //private static void TCPClient()
+        //{
+        //    TcpClient client = new TcpClient();
+        //    IPAddress ipAddress = IPAddress.Parse(default_Host);
+
+        //    StreamWriter sw;
+
+        //    try
+        //    {
+        //        client.Connect(ipAddress, default_Port);
+        //        client.SendTimeout = timeOut;
+        //        client.ReceiveTimeout = timeOut;
+
+        //        string u_input = "";
+
+        //        sw = new StreamWriter(client.GetStream());
+        //        try
+        //        {
+        //            do
+        //            {
+        //                u_input = Console.ReadLine();
+        //                sw.WriteLine(u_input);
+        //                sw.Flush();
+
+        //            } while (u_input != "stop");
+
+        //            Main(u_input.Split());
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            Console.WriteLine("ERROR : trouble streaming client ~~~ \n" + e);
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Console.WriteLine("ERROR : trouble connecting client ~~~ \n" + e);
+        //    }
+        //}
 
         private static TcpClient TCP_client;
 
@@ -152,7 +192,7 @@ namespace Client
         //Bytes
         #region BYTES
 
-        private static Socket ConnectSocket(string server, int port)
+        private static void ConnectSocket(string server, int port)
         {
             Socket s = null;
             IPHostEntry hostEntry = null;
@@ -166,7 +206,7 @@ namespace Client
             foreach (IPAddress address in hostEntry.AddressList)
             {
                 IPEndPoint ipe = new IPEndPoint(address, port);
-                Socket tempSocket = new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                Socket tempSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
                 tempSocket.Connect(default_Host, default_Port);
 
@@ -180,7 +220,14 @@ namespace Client
                     continue;
                 }
             }
-            return s;
+
+            NetworkStream socketStream = new NetworkStream(s);
+
+            byte[] buffer = Encoding.ASCII.GetBytes(Console.ReadLine());
+
+            socketStream.Write(buffer, 0, buffer.Length);
+            socketStream.Flush();
+
         }
 
         public static bool firstRun = true;
@@ -206,30 +253,6 @@ namespace Client
 
         private static void sendBytes(TcpClient client)
         {
-            //TcpClient test_Client = new TcpClient();
-            //Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-            //try
-            //{
-            //    IPEndPoint endPoint = new IPEndPoint(broadcast, default_Port);
-
-            //    string asciiString = Encoding.ASCII.GetString(buffer, 0, buffer.Length);
-
-            //    if (asciiString == "back")
-            //    {
-            //        Main(buffer.ToString().Split());
-            //    }
-
-            //    s.SendTo(buffer, endPoint);
-
-
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine("ERROR: Cannot connect to endpoint");
-            //    Console.WriteLine("/n" + e);
-            //}
-            //sendBytes();
 
             StreamWriter sw;
 
