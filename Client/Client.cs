@@ -60,69 +60,30 @@ namespace Client
         #region TCP CLIENT
 
 
-        private static void TCPClient()
-        {
-            TcpClient client = new TcpClient();
-
-
-            try
-            {
-                client.Connect(default_Host, default_Port);
-                client.SendTimeout = timeOut;
-                client.ReceiveTimeout = timeOut;
-
-                string u_input = "";
-
-                NetworkStream stream = client.GetStream();
-
-                try
-                {
-                    do
-                    {
-                        u_input = Console.ReadLine();
-
-                        byte[] data = System.Text.Encoding.ASCII.GetBytes(u_input);
-
-                        stream.Write(data, 0, data.Length);
-                    } while (u_input != "stop");
-
-                    Main(u_input.Split());
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("ERROR : trouble streaming client ~~~ \n" + e);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("ERROR : trouble connecting client ~~~ \n" + e);
-            }
-        }
-
         //private static void TCPClient()
         //{
         //    TcpClient client = new TcpClient();
-        //    IPAddress ipAddress = IPAddress.Parse(default_Host);
 
-        //    StreamWriter sw;
 
         //    try
         //    {
-        //        client.Connect(ipAddress, default_Port);
+        //        client.Connect(default_Host, default_Port);
         //        client.SendTimeout = timeOut;
         //        client.ReceiveTimeout = timeOut;
 
         //        string u_input = "";
 
-        //        sw = new StreamWriter(client.GetStream());
+        //        NetworkStream stream = client.GetStream();
+
         //        try
         //        {
         //            do
         //            {
         //                u_input = Console.ReadLine();
-        //                sw.WriteLine(u_input);
-        //                sw.Flush();
 
+        //                byte[] data = System.Text.Encoding.ASCII.GetBytes(u_input);
+
+        //                stream.Write(data, 0, data.Length);
         //            } while (u_input != "stop");
 
         //            Main(u_input.Split());
@@ -137,6 +98,45 @@ namespace Client
         //        Console.WriteLine("ERROR : trouble connecting client ~~~ \n" + e);
         //    }
         //}
+
+        private static void TCPClient()
+        {
+            TcpClient client = new TcpClient();
+            IPAddress ipAddress = IPAddress.Parse(default_Host);
+
+            StreamWriter sw;
+
+            try
+            {
+                client.Connect(ipAddress, default_Port);
+                client.SendTimeout = timeOut;
+                client.ReceiveTimeout = timeOut;
+
+                string u_input = "";
+
+                sw = new StreamWriter(client.GetStream());
+                try
+                {
+                    do
+                    {
+                        u_input = Console.ReadLine();
+                        sw.WriteLine(u_input);
+                        sw.Flush();
+
+                    } while (u_input != "stop");
+
+                    Main(u_input.Split());
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("ERROR : trouble streaming client ~~~ \n" + e);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("ERROR : trouble connecting client ~~~ \n" + e);
+            }
+        }
 
         private static TcpClient TCP_client;
 
